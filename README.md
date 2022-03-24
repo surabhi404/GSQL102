@@ -204,13 +204,19 @@ INTERPRET QUERY () SYNTAX v2 {
   SumAccum<int> @@cnt;
 
   F  =  SELECT t
+  
         FROM :s -(LIKES>:e1)- :msg -(HAS_CREATOR>)- :t
+  
         WHERE s.firstName == "Viktor" AND s.lastName == "Akhiezer" AND t.lastName LIKE "S%";
 
   Alumni = SELECT p
+  
            FROM Person:p -(STUDY_AT>) -:u - (<STUDY_AT)- F:s
+                                                         
            WHERE s != p
+                                                         
            Per (p)
+                                                         
            POST-ACCUM @@cnt+=1;
 
 
@@ -221,11 +227,18 @@ INTERPRET QUERY () SYNTAX v2 {
 #result
 {
   "error": false,
+                                                         
   "message": "",
+                                                         
   "version": {
+                                                         
     "schema": 0,
+                                                         
     "edition": "enterprise",
+                                                         
     "api": "v2"
+                                                         
   },
-  "results": [{"@@cnt": 216}]
+                                                         
+  "results": [{"@@cnt": 216}]                                                         
 }
