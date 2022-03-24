@@ -99,10 +99,133 @@ INTERPRET QUERY () SYNTAX v2{
 
   PRINT Result[Result.@commentCnt, Result.@postCnt];
 }
-                                                                                 
-                                                                                 
-                                                                           
-  
+# Interpreted Mode for GSQL- Repeating 1-Hop
+To find direct or indirect superclass (including the self class) of the TagClass whose name is "TennisPlayer".(unconstrained repetition)  
 
+USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2 {
+
+  TagClass1 =  SELECT t
+               
+  FROM TagClass:s - (IS_SUBCLASS_OF>*) - TagClass:t
   
+  WHERE s.name == "TennisPlayer";
+
+    PRINT  TagClass1;
+}  
   
+To Find the 1 to 2 hops direct and indirect superclasses of the TagClass whose name is "TennisPlayer".                                                                                  
+USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2 {
+
+  TagClass1 =  SELECT t
+  
+               FROM TagClass:s - (IS_SUBCLASS_OF>*1..2) - TagClass:t
+  
+               WHERE s.name == "TennisPlayer";
+
+    PRINT  TagClass1;
+}                                                                                 
+
+Find the superclasses within 2 hops of the TagClass whose name is "TennisPlayer". 
+
+USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2 {
+
+  TagClass1 =  SELECT t
+  
+               FROM TagClass:s - (IS_SUBCLASS_OF>*..2) - TagClass:t
+  
+               WHERE s.name == "TennisPlayer";
+
+    PRINT  TagClass1;
+}  
+
+To Find the superclasses at least one hop from the TagClass whose name is "TennisPlayer".   
+
+USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2 {
+
+  TagClass1 =  SELECT t
+  
+               FROM TagClass:s - (IS_SUBCLASS_OF>*1..) - TagClass:t
+  
+               WHERE s.name == "TennisPlayer";
+
+    PRINT  TagClass1;
+}
+# Examples of Multiple Hop Pattern Match
+USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2 {
+
+  TagClass1 = 
+       SELECT t
+  
+       FROM TagClass:s-(IS_SUBCLASS_OF>.IS_SUBCLASS_OF>.IS_SUBCLASS_OF>)-TagClass:t
+  
+       WHERE s.name == "TennisPlayer";
+
+  PRINT TagClass1;
+}  
+To Find in which continents were the 3 most recent messages in Jan 2011 created.
+  
+USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2{
+
+  SumAccum<String> @continentName;
+
+  accMsgContinent = 
+  
+                 SELECT s
+  
+                 FROM (Comment|Post):s-(IS_LOCATED_IN>.IS_PART_OF>)-Continent:t
+  
+                 WHERE year(s.creationDate) == 2011 AND month(s.creationDate) == 1
+  
+                 ACCUM s.@continentName = t.name
+  
+                 ORDER BY s.creationDate DESC
+  
+                 LIMIT 3;
+
+  PRINT accMsgContinent;
+}
+# Multi-Block Queries  
+  USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2 {
+
+  SumAccum<int> @@cnt;
+
+  F  =  SELECT t
+        FROM :s -(LIKES>:e1)- :msg -(HAS_CREATOR>)- :t
+        WHERE s.firstName == "Viktor" AND s.lastName == "Akhiezer" AND t.lastName LIKE "S%";
+
+  Alumni = SELECT p
+           FROM Person:p -(STUDY_AT>) -:u - (<STUDY_AT)- F:s
+           WHERE s != p
+           Per (p)
+           POST-ACCUM @@cnt+=1;
+
+
+  PRINT @@cnt;
+
+}
+
+#result
+{
+  "error": false,
+  "message": "",
+  "version": {
+    "schema": 0,
+    "edition": "enterprise",
+    "api": "v2"
+  },
+  "results": [{"@@cnt": 216}]
+}
