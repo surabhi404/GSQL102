@@ -1,4 +1,4 @@
-# GSQL102
+# Basic Commands
 Pattern Matching- Finding subgraph within a graph that matches a pattern like vertex-edge-vertex-edge
 
 $ gadmin start all -starts all services
@@ -36,19 +36,72 @@ We call below function stat_vertex_number  to return the cardinality of each ver
   
 curl -X POST 'http://localhost:9000/builtins/ldbc_snb' -d  '{"function":"stat_vertex_number","type":"*"}'  | jq .  
   
-1-HOP PATTERN-
+# 1-HOP PATTERN-
   
 Person:p -(LIKES:e)-> Message:m    or       Person:p -((LIKES>|<HAS_CREATOR):e)- Message:m
                                                                                  
 Vertex Type Wildcards and Path Symmetry-
                                                                                  
 CREATE QUERY seedSet() FOR GRAPH ldbc_snb SYNTAX v1 {
-    Source = {Person}; // Seed set 
-    SELECT t FROM Source:s -(IS_LOCATED_IN:e)- :t;
-    PRINT t;
+
+Source = {Person}; // Seed set 
+
+SELECT t FROM Source:s -(IS_LOCATED_IN:e)- :t;
+  
+PRINT t;
 }                                                                                 
+
+Examples of 1-Hop Fixed Length Query-
+
+USE GRAPH ldbc_snb
+
+INTERPRET QUERY () SYNTAX v2 {
+
+friends = SELECT p
+
+FROM Person:s -(KNOWS:e)- Person:p
+
+ WHERE s.firstName == "Viktor" AND s.lastName == "Akhiezer"
+ 
+ ORDER BY p.birthday ASC
+ 
+ LIMIT 3;
+
+ PRINT  friends[friends.firstName, friends.lastName, friends.birthday];
+}  
+
+# Disjunctive 1 hop edge pattern-
+                                                                                 
+USE GRAPH ldbc_snb
+                                                                                 
+set query_timeout=60000
+                                                                                
+INTERPRET QUERY () SYNTAX v2{
+                                                                                 
+  SumAccum<int> @commentCnt= 0;
   
+  SumAccum<int> @postCnt= 0;
+
+  Result = SELECT tgt
   
+           FROM Person:tgt -(<HAS_CREATOR|LIKES>)- (Comment|Post):src
+  
+           WHERE tgt.firstName == "Viktor" AND tgt.lastName == "Akhiezer"
+  
+           ACCUM CASE WHEN src.type == "Comment" THEN
+  
+                          tgt.@commentCnt += 1
+  
+                      WHEN src.type == "Post" THEN
+  
+                          tgt.@postCnt += 1
+                 END;
+
+  PRINT Result[Result.@commentCnt, Result.@postCnt];
+}
+                                                                                 
+                                                                                 
+                                                                           
   
 
   
