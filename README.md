@@ -76,7 +76,7 @@ any edge (directed or undirected)
                             
 Same as (<_|_>|_)
   
-Examples of 1-Hop Patterns: 
+## Examples of 1-Hop Patterns: 
 
   Person:p -(LIKES:e)-> Message:m    or       Person:p -((LIKES>|<HAS_CREATOR):e)- Message:m
                                                                                  
