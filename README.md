@@ -37,28 +37,48 @@ We call below function stat_vertex_number  to return the cardinality of each ver
 curl -X POST 'http://localhost:9000/builtins/ldbc_snb' -d  '{"function":"stat_vertex_number","type":"*"}'  | jq .  
   
 # 1-HOP PATTERN-
-  Examples of 1-Hop Patterns
+  
  FROM X:x - (E1:e1) - Y:y
+  
 E1 is an undirected edge, x and y bind to the end points of E1, and e1 is the alias of E1.
+  
 FROM X:x - (E2>:e2) - Y:y
+  
 Right directed edge x binds to the source of E2; y binds to the target of E2.
+  
 FROM X:x - (<E3:e3) - Y:y
+                    
 Left directed edge; y binds to the source of E3; x binds to the target of E3.
+                    
 FROM X:x - (_:e) - Y:y
+                    
 Any undirected edge between a member of X and a member of Y.
+                    
 FROM X:x - (_>:e) - Y:y
+  
 Any right directed edge with source in X and target in Y.
+  
 FROM X:x - (<_:e) - Y:y
+                  
 Any left directed edge with source in Y and target in X.
+                  
 FROM X:x - ((<_|_):e) - Y:y
+  
 Any left directed or any undirected; "|" means OR, and parentheses enclose the group of edge descriptors; e is the alias for the edge pattern (<_|_).
+                                                                                                                                                      
 FROM X:x - ((E1|E2>|<E3):e) - Y:y
+                            
 Any one of the three edge patterns.
+                            
 FROM X:x - () - Y:y
+                            
 any edge (directed or undirected)
+                            
 Same as (<_|_>|_)
   
-Person:p -(LIKES:e)-> Message:m    or       Person:p -((LIKES>|<HAS_CREATOR):e)- Message:m
+Examples of 1-Hop Patterns: 
+
+  Person:p -(LIKES:e)-> Message:m    or       Person:p -((LIKES>|<HAS_CREATOR):e)- Message:m
                                                                                  
 Vertex Type Wildcards and Path Symmetry-
                                                                                  
